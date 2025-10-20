@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "export",
   images: {
+    unoptimized: true,
     domains: ["i.ytimg.com", "img.youtube.com", "images.soundcloud.com"],
     remotePatterns: [
       { protocol: "https", hostname: "i.ytimg.com" },
@@ -11,6 +12,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.soundcloud.com" },
     ],
   },
+  basePath: "/vibes_fm",
+  assetPrefix: "/vibes_fm",
 };
 
 export default nextConfig;
