@@ -61,6 +61,11 @@ VIBES.FM is a personal music curation platform where Nalostta shares carefully c
 - Image upload for mix covers
 - SEO optimization
 
+## System Architecture
+- High-level architecture, routing model, and build assumptions are documented in `ARCHITECTURE.md`; review it alongside this brief before implementing major changes.
+- Current codebase uses Next.js 15 App Router with a static-export pipeline; Markdown posts in `web/content/posts` are parsed at build time (see `ARCHITECTURE.md` for details).
+- Shared client widgets (`NavBar`, `AudioPlayer`, `KoiBackground`) and styling conventions are outlined in `ARCHITECTURE.md` to keep new features consistent with the existing design system.
+
 ## Design Aesthetic
 - Clean, minimalist interface
 - Dark theme by default (better for audio players)
