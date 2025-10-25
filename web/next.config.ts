@@ -12,8 +12,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.soundcloud.com" },
     ],
   },
-  basePath: "",
-  assetPrefix: "",
+  basePath: process.env.NODE_ENV === 'production' ? '/vibes_fm' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/vibes_fm' : '',
 };
 
 export default nextConfig;
