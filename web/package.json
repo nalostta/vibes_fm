@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "export": "next export -o out",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "deploy": "gh-pages -d out",
