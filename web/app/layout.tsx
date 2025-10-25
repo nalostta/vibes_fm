@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// Define font variables
+const fontSans = GeistSans;
+const fontMono = GeistMono;
 
 export const metadata: Metadata = {
   title: "VIBES.FM — Music Mixes & Tracklists",
@@ -25,10 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white min-h-screen flex flex-col`}
-      >
+    <html lang="en" className={`${fontSans.variable} ${fontMono.variable}`}>
+      <body className="font-sans antialiased bg-black text-white min-h-screen flex flex-col dark">
         <NavBar />
         <div className="flex-1">
           {children}

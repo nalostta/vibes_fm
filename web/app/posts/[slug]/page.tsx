@@ -1,6 +1,8 @@
 import { getPostBySlug, getAllPosts } from "@/lib/posts";
 import { notFound } from "next/navigation";
 
+export const dynamicParams = false;
+
 function Embed({ type, url }: { type: "youtube" | "soundcloud"; url: string }) {
   if (type === "youtube") {
     return (
@@ -29,14 +31,13 @@ function Embed({ type, url }: { type: "youtube" | "soundcloud"; url: string }) {
   );
 }
 
-// Pre-render all post slugs for static export
-export function generateStaticParams() {
+// Generate static params at build time
+export async function generateStaticParams() {
   const posts = getAllPosts();
-  return posts.map((p) => ({ slug: p.slug }));
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
 }
-
-// Only allow statically generated paths
-export const dynamicParams = false;
 
 export default function PostPage({ params }: { params: { slug: string } }) {
   const post = getPostBySlug(params.slug);
