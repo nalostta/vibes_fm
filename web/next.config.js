@@ -24,7 +24,20 @@ const nextConfig = {
   // Add trailing slash for static exports
   trailingSlash: true,
   
-  // Custom webpack configuration
+  // Disable source maps in production
+  productionBrowserSourceMaps: false,
+  
+  // Disable TypeScript type checking during build
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  
+  // Disable ESLint during build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
+  // Configure webpack for static export
   webpack: (config, { isServer }) => {
     // Add file-loader for static files
     config.module.rules.push({
@@ -41,26 +54,27 @@ const nextConfig = {
         ...config.resolve.fallback,
         fs: false,
         path: false,
+        stream: false,
+        crypto: false,
       };
     }
     
     return config;
   },
   
-  // Disable source maps in production
-  productionBrowserSourceMaps: false,
-  
-  // Disable React DevTools in production
-  reactStrictMode: true,
-  
-  // Disable TypeScript type checking during build
-  typescript: {
-    ignoreBuildErrors: false,
-  },
-  
-  // Disable ESLint during build
-  eslint: {
-    ignoreDuringBuilds: true,
+  // Configure headers for static export
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
 };
 
