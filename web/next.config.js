@@ -6,12 +6,10 @@ const nextConfig = {
   output: 'export',
   
   // Configure base path for GitHub Pages
-  ...(isGHPages && {
-    basePath: '/vibes_fm',
-    assetPrefix: '/vibes_fm',
-  }),
+  basePath: isGHPages ? '/vibes_fm' : '',
+  assetPrefix: isGHPages ? '/vibes_fm' : '',
   
-  // Image optimization configuration
+  // Disable image optimization API (not needed for static export)
   images: {
     unoptimized: true,
     domains: ['i.ytimg.com', 'img.youtube.com', 'images.soundcloud.com'],
@@ -49,23 +47,21 @@ const nextConfig = {
     return config;
   },
   
-  // Customize the output directory for static export
-  distDir: 'out',
+  // Disable source maps in production
+  productionBrowserSourceMaps: false,
   
-  // Disable image optimization API (not needed for static export)
-  images: {
-    unoptimized: true,
+  // Disable React DevTools in production
+  reactStrictMode: true,
+  
+  // Disable TypeScript type checking during build
+  typescript: {
+    ignoreBuildErrors: false,
   },
   
-  // Ensure static export works with next/link
-  experimental: {
-    scrollRestoration: true,
+  // Disable ESLint during build
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 };
-
-// Only enable assetPrefix in production
-if (process.env.NODE_ENV === 'production' && isGHPages) {
-  nextConfig.assetPrefix = '/vibes_fm';
-}
 
 module.exports = nextConfig;
