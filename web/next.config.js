@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Static export for GitHub Pages (served at custom domain root)
-  output: 'export',
+  // Static export only in production (dev uses default behavior)
+  output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
 
   images: {
     unoptimized: true,

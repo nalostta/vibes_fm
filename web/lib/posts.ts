@@ -23,12 +23,21 @@ function parseMarkdown(raw: string): { frontmatter: PostFrontmatter; content: st
   if (!fmMatch) {
     throw new Error("Missing frontmatter block in markdown post");
   }
-  const fmJson = fmMatch[1];
+  
+  const fmContent = fmMatch[1];
   let frontmatter: PostFrontmatter;
+  
   try {
-    frontmatter = JSON.parse(fmJson);
+    // First try to parse as JSON (wrapped in {})
+    if (fmContent.trim().startsWith('{') && fmContent.trim().endsWith('}')) {
+      frontmatter = JSON.parse(fmContent);
+    } else {
+      // Fall back to YAML parsing if not JSON
+      const yaml = require('js-yaml');
+      frontmatter = yaml.load(fmContent) as PostFrontmatter;
+    }
   } catch (e) {
-    throw new Error("Invalid JSON frontmatter: " + (e as Error).message);
+    throw new Error(`Invalid frontmatter: ${(e as Error).message}`);
   }
   const content = raw.slice(fmMatch[0].length).trim();
   return { frontmatter, content };
@@ -39,7 +48,18 @@ export function getCoverFromEmbed(post: PostFrontmatter): string | null {
   if (post.embed?.type === "youtube") {
     // Expect embed url like https://www.youtube.com/embed/<VIDEO_ID>
     const match = post.embed.url.match(/\/embed\/([a-zA-Z0-9_-]{6,})/);
-    const id = match?.[1];
+    let id = match?.[1];
+    if (!id) {
+      try {
+        const u = new URL(post.embed.url);
+        id = u.searchParams.get("v") || undefined;
+        if (!id) {
+          const youtu = u.hostname.includes("youtu.be") ? u.pathname.replace(/^\//, "") : undefined;
+          const shorts = u.pathname.match(/\/shorts\/([a-zA-Z0-9_-]{6,})/);
+          id = youtu || shorts?.[1] || undefined;
+        }
+      } catch {}
+    }
     if (id) return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
   }
   // SoundCloud thumbnails would require API; return null unless provided via cover

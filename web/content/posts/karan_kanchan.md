@@ -1,0 +1,71 @@
+---
+{
+  "title": "Karan Kanchan Boiler Room",
+  "slug": "Karan-Kanchan",
+  "date": "2025-10-01",
+  "postType": "dj_set",
+  "tags": ["Bollywood", "Indian-Hip-Hop", "Hip-Hop","Indian-Pop","EDM","Boiler Room"],
+  "embed": { "type": "youtube", "url": "https://www.youtube.com/watch?v=SQafz5PSEjA" },
+  "tracklist": [
+    "1. Aika Dajiba(karan kanchan remix) - 1:20",
+    "2. DNA - kendric lamar -  3:5      3",
+    "3. Skrillex - Xena - 4     :21",
+    "4. Joyryde - Yardie -       5:39",
+    "5. Dolev and Davee - Global warming         - 6:32",
+    "6. Difshock and ORVMO - The Dogon Sirius (Jizzy & Mechanic Remix) - 7:51",
+    "7. CAESAR562LBC - EDC Las Vegas and Mexico - 8:90",
+    "8. Pitbull - Hotel Room Service(camoufly remix) - 9:30",
+    "9. Chaar Baj Gaye - karan kanchan remix  - 10:10",
+    "10. Divine - Satya  - 10:50",
+    "11. Skrillex - Badders  - 12:50",
+    "12. Yashraj - Raakh - 13:44",
+    "13. IDK what this is - 15:55",
+    "14. MC Altaf - unreleased - 17:10 ",
+    "15. Vengaboys - Boom Boom Boom Boom x doja by Central Cee - 19:10",
+    "16. MC Stan - Basti ka Hasti(Mix idk)  - 20:10",
+    "17. Travis Scott - No bystanders - 21:12",
+    "18. Jazzy B - Dil Luteya - 22:10 ",
+    "19. Sidhu Moose Wala - 47  - 23:20",
+    "20. Divine - kaam 25 - 24:05",
+    "21. IDK - karan kanchan  - 25:32",
+    "22. 50 Cent - Just A Lil Bit (Onderkoffer Remix) - 26:30",
+    "23. IDK - 27:27",
+    "24. Ap Dhillon - brown Munde - 28:33",
+    "25. Hardy Sandhu - Bijli Bijli - 29:14",
+    "26. Rogue - Don't be Shy - 29:23",
+    "27. Abhishek bacchan - Right here Right Now - 30:20",
+    "28. Bombay Vikings - chhod do aanchal - 31:16",
+    "29. Baby H - Mere Naseeb Mai  - 32:12",
+    "30. Jalal Hamdaoui - Golou l'mama (feat. Rayan) - 33:23",
+    "31. Omer Inayat - Tennu Le - 34:00",
+    "32. Daft Punk - One More Time - 35:28",
+    "33. Divine - Mirchi  - 35:50",
+    "34. TToten - Beat Do Papagio - 37:40",
+    "35. Karan! - Umupo - 38:10 ",
+    "36. Martin Schuster DJ - Contra la pared aleteo - 39:08",
+    "37. Hamshyre - New Juice - 39:52",
+    "38.  Fisher - Losing it  - 40:37 ",
+    "39. Joyryde - Hot Drum  - 41:56",
+    "40. Tony Quattaro - Fuerza - 42:42",
+    "41. Alexandra Stan - Mr. Saxobeat (Radio Edit) - 43:40",
+    "42. Yves Larock - Rise Up ft.Jaba - 44:36",
+    "43. William -  Scream & Shout - 45:28 ",
+    "44. Divine - Satya , baazigar ,  (live) - 46:20",
+    "45 The Game - El chappo - 50:22",
+    "46. Divine - Mere Gully me x MJ - 52:04 ",
+    "47. Shamur- Let The Music Play - 53:36",
+    "48. Bombay Rockers - rock tha party - 55:00 ",
+    "49. Tunak Tunak x Newbie Dump Mixtape v.5 - 55:55",
+    "50. jailer- kavaalaa - 57:20",
+    "51. Ishq Kamina - 58:18",
+    "52. Riar Saab - Obsessed - 59:10",
+    "53. Pritam Pritam Pritam(chori chori dil tera churayenge)  - 1:00:56"
+  ]
+}
+---
+Karan Kanchan & Friends - live from Boiler Room x Ballantine's True Music Studios in Mumbai.
+
+
+Highlights:
+- Representing Bollywood, Hip-Hop, and Indian Pop
+- Mumbai based DJ
