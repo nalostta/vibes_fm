@@ -10,6 +10,7 @@ export type PostFrontmatter = {
   embed?: { type: "youtube" | "soundcloud"; url: string } | null;
   tracklist?: string[];
   cover?: string; // optional custom cover image
+  audioUrl?: string; // optional direct audio URL for mini player
 };
 
 export type Post = PostFrontmatter & {

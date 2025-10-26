@@ -1,19 +1,14 @@
 import { getPostBySlug, getAllPosts } from "@/lib/posts";
 import { notFound } from "next/navigation";
+import YouTubeAudioPlayer from "@/components/YouTubeAudioPlayer";
 
 export const dynamicParams = false;
 
-function Embed({ type, url }: { type: "youtube" | "soundcloud"; url: string }) {
+function Embed({ type, url, title }: { type: "youtube" | "soundcloud"; url: string; title: string }) {
   if (type === "youtube") {
     return (
-      <div className="aspect-video w-full overflow-hidden rounded-md border border-white/10 bg-black/40">
-        <iframe
-          className="w-full h-full"
-          src={url}
-          title="YouTube player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        />
+      <div className="w-full overflow-hidden rounded-md border border-white/10 bg-black/40">
+        <YouTubeAudioPlayer url={url} title={title} />
       </div>
     );
   }
@@ -59,7 +54,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
 
       <h1 className="text-2xl sm:text-3xl font-semibold">{post.title}</h1>
 
-      {post.embed ? <Embed type={post.embed.type} url={post.embed.url} /> : null}
+      {post.embed ? <Embed type={post.embed.type} url={post.embed.url} title={post.title} /> : null}
 
       {post.tracklist && post.tracklist.length ? (
         <section className="space-y-2">

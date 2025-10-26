@@ -5,7 +5,7 @@
   "date": "2025-10-01",
   "postType": "dj_set",
   "tags": ["Marathi", "Indian-Hip-Hop", "Hip-Hop","Bhim-Jayanti","EDM","Boiler Room"],
-  "embed": { "type": "youtube", "url": "https://www.youtube.com/watch?v=zqVREgTA8D4&list=RDzqVREgTA8D4&start_radio=1&t=1060s" },
+  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/watch?v=zqVREgTA8D4&list=RDzqVREgTA8D4&start_radio=1&t=1060s" },
   "tracklist": [
     "1. Aika Dajiba(karan kanchan remix) - 1:20",
     "2. DNA - kendric lamar -  3:5      3",

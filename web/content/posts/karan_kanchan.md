@@ -5,7 +5,7 @@
   "date": "2025-10-01",
   "postType": "dj_set",
   "tags": ["Bollywood", "Indian-Hip-Hop", "Hip-Hop","Indian-Pop","EDM","Boiler Room"],
-  "embed": { "type": "youtube", "url": "https://www.youtube.com/watch?v=SQafz5PSEjA" },
+  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/watch?v=SQafz5PSEjA" },
   "tracklist": [
     "1. Aika Dajiba(karan kanchan remix) - 1:20",
     "2. DNA - kendric lamar -  3:5      3",
