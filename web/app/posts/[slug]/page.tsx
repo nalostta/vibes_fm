@@ -49,7 +49,12 @@ export default function PostPage({ params }: { params: { slug: string } }) {
             <span key={t} className="text-xs text-white/70">#{t}</span>
           ))}
         </div>
-        <span className="text-xs text-white/50">{new Date(post.date).toLocaleDateString()}</span>
+        <div className="flex flex-col items-end leading-tight">
+          <span className="text-xs text-white/50">{new Date(post.date).toLocaleDateString()}</span>
+          {post.eventDate ? (
+            <span className="text-[10px] text-white/60">Event: {new Date(post.eventDate).toLocaleDateString()}</span>
+          ) : null}
+        </div>
       </div>
 
       <h1 className="text-2xl sm:text-3xl font-semibold">{post.title}</h1>

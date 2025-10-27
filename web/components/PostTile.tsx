@@ -4,14 +4,14 @@ type Props = {
   slug: string;
   title: string;
   date?: string;
-  postType: "individual_track" | "dj_set" | "set_remake" | "music_mashup";
+  postType: "individual_track" | "DJ-Set" | "set_remake" | "music_mashup";
   tags?: string[];
   cover?: string;
 };
 
 const typeLabel: Record<Props["postType"], string> = {
   individual_track: "Track",
-  dj_set: "DJ Set",
+  DJ-Set: "DJ Set",
   set_remake: "Set Remake",
   music_mashup: "Mashup",
 };

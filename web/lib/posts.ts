@@ -5,7 +5,9 @@ export type PostFrontmatter = {
   title: string;
   slug: string;
   date: string; // ISO string
-  postType: "individual_track" | "dj_set" | "set_remake" | "music_mashup";
+  eventDate?: string; // optional event date (ISO)
+  postType: "individual_track" | "DJ-Set" | "set_remake" | "music_mashup";
+  draft?: boolean;
   tags?: string[];
   embed?: { type: "youtube" | "soundcloud"; url: string } | null;
   tracklist?: string[];
@@ -75,7 +77,8 @@ export function getAllPosts(): Post[] {
     const { frontmatter, content } = parseMarkdown(raw);
     return { ...frontmatter, content };
   });
-  return posts.sort((a, b) => (a.date < b.date ? 1 : -1));
+  const published = posts.filter((p) => !p.draft);
+  return published.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
 export function getPostBySlug(slug: string): Post | null {
@@ -84,6 +87,7 @@ export function getPostBySlug(slug: string): Post | null {
     const raw = fs.readFileSync(path.join(postsDir, file), "utf-8");
     const { frontmatter, content } = parseMarkdown(raw);
     if (frontmatter.slug === slug) {
+      if (frontmatter.draft) return null;
       return { ...frontmatter, content };
     }
   }

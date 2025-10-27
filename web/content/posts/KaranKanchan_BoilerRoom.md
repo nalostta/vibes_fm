@@ -3,7 +3,8 @@
   "title": "Karan Kanchan Boiler Room",
   "slug": "Karan-Kanchan",
   "date": "2025-10-01",
-  "postType": "dj_set",
+  "postType": "DJ-Set",
+  "draft": false,
   "tags": ["Bollywood", "Indian-Hip-Hop", "Hip-Hop","Indian-Pop","EDM","Boiler Room"],
   "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/watch?v=SQafz5PSEjA" },
   "tracklist": [
