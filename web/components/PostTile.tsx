@@ -11,7 +11,7 @@ type Props = {
 
 const typeLabel: Record<Props["postType"], string> = {
   individual_track: "Track",
-  DJ-Set: "DJ Set",
+  "DJ-Set": "DJ Set",
   set_remake: "Set Remake",
   music_mashup: "Mashup",
 };
