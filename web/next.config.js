@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Static export only in production (dev uses default behavior)
-  output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
-
+  // Static export for GitHub Pages / static hosting
+  output: 'export',
   images: {
     unoptimized: true,
     domains: ['i.ytimg.com', 'img.youtube.com', 'images.soundcloud.com'],

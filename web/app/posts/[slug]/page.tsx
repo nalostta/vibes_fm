@@ -4,6 +4,11 @@ import YouTubeAudioPlayer from "@/components/YouTubeAudioPlayer";
 
 export const dynamicParams = false;
 
+export async function generateStaticParams() {
+  const posts = getAllPosts();
+  return posts.map((post) => ({ slug: post.slug }));
+}
+
 function Embed({ type, url, title }: { type: "youtube" | "soundcloud"; url: string; title: string }) {
   if (type === "youtube") {
     return (
@@ -26,13 +31,7 @@ function Embed({ type, url, title }: { type: "youtube" | "soundcloud"; url: stri
   );
 }
 
-// Generate static params at build time
-export async function generateStaticParams() {
-  const posts = getAllPosts();
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
-}
+ 
 
 export default function PostPage({ params }: { params: { slug: string } }) {
   const post = getPostBySlug(params.slug);
