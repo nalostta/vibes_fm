@@ -8,29 +8,37 @@
   "tags": ["Tokyo", "Electronic", "Bass", "Hip-Hop", "Boiler Room"],
   "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/watch?v=Fa8LQLy4C5A&list=RDFa8LQLy4C5A&start_radio=1&t=2709s" },
   "tracklist": [
-    "00:00 Beyoncé ft. Grace Jones & Tems - MOVE (Mabrada Edit)",
-    "02:08 Benny Benassi pres. The Biz - Satisfaction (Marco Pedro & Dave Nunes & Richtanner Edit)",
-    "04:02 PinkPantheress - Just For Me (Hyalyte Edit)",
-    "06:24 DJ Gregory & Gregor Salto - Canoa",
-    "08:56 L U C Y - Okiniiri Riddim (Lamento Club Edit)",
-    "10:44 Pl4net Dust - Bumbae",
-    "11:39 Dr. Dre ft. Snoop Dogg - Still D.R.E. (Mabrada Edit)",
-    "13:11 Mina ft. Bryte - Make Money",
-    "15:05 Raffi Balboa - Baile Alman",
-    "17:08 DJ Smilez - Deep Inside (Richtanner Edit)",
-    "19:06 BIA ft. J. Cole - London (Naken & Egnever Edit)",
-    "20:11 Missy Elliott - Pass That Dutch (Burna Edit)",
-    "22:03 ID - ID",
-    "23:07 ROSALÍA - SAOKO (FUZZ & Richtanner Edit)",
-    "24:59 Pedro ft. Magugu - Too Much",
-    "27:09 TNGHT & M.I.A. - BAD GOOOORLS (BAVR Remix)",
-    "29:16 ID - ID",
-    "30:03 ID - ID",
-    "31:44 Papasito - Gasoline (Delirious Ninja Flip)",
-    "32:48 ID - ID"
-  ]
+    "00:00 Syn- Data Dust",
+    "02:08 Nan Kolè, Prynce Mini - Drop That",
+    "04:02 Damso- TieksVie (Charly Mess Remix)",
+    "06:24 Soulely - Gasolina (baile edit)",
+    "08:56 NALA - WORK x QTB16 v3 [M]",
+    "10:44 Protean Sound - Thunder",
+    "11:39 Gigi D'Agostino - L'Amour Toujours (Rasto Jejemix)",
+    "13:11 3.oh - Bounce",
+    "15:05 Fonzo & Riko Dan- Bushmaster",
+    "17:08 Russ x Tion Wayne - Body (Darama UK Funky Edit)",
+    "19:06 TNGHT & M.I.A. - BAD GOOOORLS (BAVR RMX)",
+    "20:11 XRAY - APPLE BOTTOM JEANZ",
+    "22:03 Konshens & J Capri - Mi Bumper (Mar'One remix)",
+    "23:07 Skrillex & Habstrakt - Chicken Soup (dokku remix)",
+    "24:59 HYALYTE - Shutdown",
+    "27:09 AC Slater - Jack Got Jacked (Jack Beats Remix)",
+    "29:16 Green Velvet & Harvard Bass - Lazer Beams (Bontan Remix)",
+    "30:03 Slothkidd ft. JUDO - HOT",
+    "31:44 Cajmere, Dajae - Brighter Days (Onderkoffer Remix)",
+    "32:48 TroyBoi x Jon Casey - Zurna",
+    "33:50 An Avrin - Bup",
+    "35:00 NewJeans - ETA (Foxela Remix)",
+    "36:20 Dennis, Kevin O Chris - TÁ OK (Fungi Remix)",
+    "37:40 Knucks - Los Pollos Hermanos (Hemmi Dub)",
+    "39:00 AJ Tracey, Sammy Virji - Ladbroke Grove X Find My Way Home (DJ Albert Flinth Mashup)",
+    "40:20 Fugees - Fu-Gee-La (Smochi Grind)"
+]
 }
 ---
+
+
 
 Riria brings her dynamic DJ skills to Boiler Room Tokyo, delivering a high-energy set that blends electronic, bass, and hip-hop influences.
 
