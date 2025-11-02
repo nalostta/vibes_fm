@@ -1,5 +1,7 @@
 "use client";
-import { useEffect, useRef, useState, useId } from "react";
+import { useEffect, useState } from "react";
+import { useNowPlaying } from "@/components/NowPlayingContext";
+import { ensureYouTubePlayer, subscribe, getTimes, seekTo } from "@/lib/youtubeManager";
 
 declare global {
   interface Window {
@@ -12,6 +14,20 @@ type Props = {
   url: string;
   title?: string;
 };
+
+function getStartSeconds(input: string): number | null {
+  try {
+    const u = new URL(input);
+    const t = u.searchParams.get("t");
+    if (!t) return null;
+    // supports seconds (e.g., 1928) or XmYs (e.g., 32m8s)
+    if (/^\d+$/.test(t)) return Number(t);
+    const m = t.match(/(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/i);
+    if (!m) return null;
+    const h = Number(m[1] || 0), min = Number(m[2] || 0), s = Number(m[3] || 0);
+    return h * 3600 + min * 60 + s;
+  } catch { return null; }
+}
 
 function getVideoId(input: string): string | null {
   try {
@@ -28,24 +44,20 @@ function getVideoId(input: string): string | null {
 }
 
 export default function YouTubeAudioPlayer({ url, title }: Props) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const reactId = useId();
-  const playerElIdRef = useRef<string>(`ytp-${reactId}`);
-  const playerRef = useRef<any>(null);
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [current, setCurrent] = useState(0);
-  const [queuedPlay, setQueuedPlay] = useState(false);
   const vid = getVideoId(url);
+  const { state: np, requestPlayYouTube } = useNowPlaying();
+  const isActive = np.current?.type === "youtube" && np.current.id === (vid || "");
+  const isGloballyPlaying = isActive && np.playing;
 
   useEffect(() => {
     let interval: any;
     const tick = () => {
-      const p = playerRef.current;
-      if (!p) return;
-      const t = p.getCurrentTime?.() || 0;
-      const d = p.getDuration?.() || 0;
+      if (!vid) return;
+      const { current: t, duration: d } = getTimes(vid);
       setCurrent(t);
       setDuration(d);
     };
@@ -53,93 +65,47 @@ export default function YouTubeAudioPlayer({ url, title }: Props) {
     return () => interval && clearInterval(interval);
   }, [ready]);
 
-  // Create the player lazily when needed
+  // Ensure a cached player exists for this videoId
   useEffect(() => {
+    if (!vid) return;
+    let unsubscribe: null | (() => void) = null;
+    (async () => {
+      await ensureYouTubePlayer(vid);
+      setReady(true);
+      unsubscribe = subscribe(vid, (evt) => {
+        if (evt.type === 'state') {
+          const st = evt.data;
+          if (st === 1) setPlaying(true);
+          else if (st === 2 || st === 0) setPlaying(false);
+        } else if (evt.type === 'ready') {
+          setReady(true);
+        }
+      });
+    })();
     return () => {
-      try {
-        playerRef.current?.destroy?.();
-      } catch {}
-      playerRef.current = null;
+      if (unsubscribe) unsubscribe();
     };
   }, []);
 
-  const ensurePlayer = async () => {
-    if (playerRef.current || !vid) return;
-    await new Promise<void>((resolve) => {
-      if (window.YT && window.YT.Player) return resolve();
-      const scriptId = "yt-iframe-api";
-      if (!document.getElementById(scriptId)) {
-        const s = document.createElement("script");
-        s.id = scriptId;
-        s.src = "https://www.youtube.com/iframe_api";
-        document.body.appendChild(s);
-      }
-      const onReadyApi = () => resolve();
-      if (window.YT && window.YT.Player) onReadyApi();
-      else window.onYouTubeIframeAPIReady = onReadyApi;
-    });
-    playerRef.current = new window.YT.Player(playerElIdRef.current, {
-      height: "0",
-      width: "0",
-      videoId: vid,
-      host: "https://www.youtube.com",
-      playerVars: {
-        playsinline: 1,
-        modestbranding: 1,
-        rel: 0,
-        enablejsapi: 1,
-        origin: typeof window !== "undefined" ? window.location.origin : undefined,
-      },
-      events: {
-        onReady: () => {
-          setReady(true);
-          if (queuedPlay) {
-            try {
-              if (typeof playerRef.current?.playVideo === 'function') playerRef.current.playVideo();
-              setPlaying(true);
-            } catch {}
-            setQueuedPlay(false);
-          }
-        },
-        onStateChange: (e: any) => {
-          const st = e.data;
-          if (st === 1) setPlaying(true);
-          else if (st === 2 || st === 0) setPlaying(false);
-        },
-      },
-    });
-  };
-
   const toggle = () => {
-    const p = playerRef.current;
-    if (!p || !ready) {
-      // Queue a play and ensure API/player creation proceeds
-      setQueuedPlay(true);
-      void ensurePlayer();
-      return;
-    }
-    if (playing) {
-      if (typeof p.pauseVideo === 'function') p.pauseVideo();
-    } else {
-      if (typeof p.playVideo === 'function') p.playVideo();
-    }
+    if (!vid) return;
+    // Delegate to NowPlaying so others get paused
+    const startSeconds = getStartSeconds(url) ?? undefined;
+    void requestPlayYouTube(vid, { title, startSeconds });
   };
 
   const seekBy = (delta: number) => {
-    const p = playerRef.current;
-    if (!p || !ready) return;
-    const getDur = typeof p.getDuration === 'function' ? p.getDuration() : 0;
-    const getCur = typeof p.getCurrentTime === 'function' ? p.getCurrentTime() : 0;
-    const next = Math.max(0, Math.min(getDur, getCur + delta));
-    if (typeof p.seekTo === 'function') p.seekTo(next, true);
+    if (!vid || !ready) return;
+    const { current: cur, duration: dur } = getTimes(vid);
+    const next = Math.max(0, Math.min(dur, cur + delta));
+    seekTo(vid, next);
     setCurrent(next);
   };
 
   const onSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const p = playerRef.current;
-    if (!p || !ready) return;
+    if (!vid || !ready) return;
     const v = Number(e.target.value);
-    if (typeof p.seekTo === 'function') p.seekTo(v, true);
+    seekTo(vid, v);
     setCurrent(v);
   };
 
@@ -162,7 +128,7 @@ export default function YouTubeAudioPlayer({ url, title }: Props) {
             className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 disabled:opacity-50 text-sm"
             title={playing ? "Pause" : "Play"}
           >
-            <span aria-hidden>{playing ? "❚❚" : "►"}</span>
+            <span aria-hidden>{isGloballyPlaying ? "❚❚" : "►"}</span>
           </button>
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); seekBy(10); }}
@@ -188,9 +154,7 @@ export default function YouTubeAudioPlayer({ url, title }: Props) {
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
         onChange={(e) => { e.preventDefault(); e.stopPropagation(); onSeek(e); }}
       />
-      <div style={{ width: 0, height: 0, overflow: "hidden" }}>
-        <div id={playerElIdRef.current} ref={containerRef} />
-      </div>
+      {/* Uses shared offscreen player; no local iframe needed */}
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import { NowPlayingProvider } from "@/components/NowPlayingContext";
+import NowPlayingBar from "@/components/NowPlayingBar";
 
 // Define font variables
 const fontSans = GeistSans;
@@ -22,11 +24,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fontSans.variable} ${fontMono.variable}`}>
       <body className="font-sans antialiased bg-black text-white min-h-screen flex flex-col dark">
-        <NavBar />
-        <div className="flex-1">
-          {children}
-        </div>
-        <Footer />
+        <NowPlayingProvider>
+          <NavBar />
+          <div className="flex-1">
+            {children}
+          </div>
+          <NowPlayingBar />
+          <Footer />
+        </NowPlayingProvider>
       </body>
     </html>
   );

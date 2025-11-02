@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import { useNowPlaying } from "@/components/NowPlayingContext";
 
 type Props = {
   src?: string | null;
@@ -10,17 +11,31 @@ export default function AudioPlayer({ src, title }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
+  const [loading, setLoading] = useState(false);
   const hasSrc = Boolean(src && src.trim().length > 0);
+  const { state: np, requestPlayAudio, pauseAll } = useNowPlaying();
+
+  const isActive = np.current?.type === "audio" && np.current.id === (src || title || "");
+  const isGloballyPlaying = isActive && np.playing;
 
   const toggle = () => {
     if (!hasSrc) return;
     const el = audioRef.current;
     if (!el) return;
     if (el.paused) {
-      el.play();
-      setPlaying(true);
+      try {
+        setLoading(true);
+        // Delegate to NowPlaying to pause others and play this element
+        void requestPlayAudio(el, { id: src || title || "", title });
+        setPlaying(true);
+        setLoading(false);
+      } catch {
+        setPlaying(false);
+        setLoading(false);
+      }
     } else {
       el.pause();
+      pauseAll();
       setPlaying(false);
     }
   };
@@ -50,16 +65,16 @@ export default function AudioPlayer({ src, title }: Props) {
         <div className="flex items-center gap-2">
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(); }}
-            disabled={!hasSrc}
+            disabled={!hasSrc || loading}
             aria-label={playing ? "Pause" : "Play"}
             className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             title={playing ? "Pause" : "Play"}
           >
-            <span aria-hidden>{playing ? "❚❚" : "►"}</span>
+            <span aria-hidden>{loading ? "…" : (isGloballyPlaying ? "❚❚" : "►")}</span>
           </button>
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); seekBy(10); }}
-            disabled={!hasSrc}
+            disabled={!hasSrc || loading}
             aria-label="Forward 10 seconds"
             className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             title="Forward 10s"
@@ -71,7 +86,7 @@ export default function AudioPlayer({ src, title }: Props) {
             className="bg-transparent border border-white/10 rounded px-2 py-1 text-xs disabled:opacity-50"
             value={speed}
             onChange={(e) => { e.preventDefault(); e.stopPropagation(); changeSpeed(Number(e.target.value)); }}
-            disabled={!hasSrc}
+            disabled={!hasSrc || loading}
           >
             <option value={0.75}>0.75x</option>
             <option value={1}>1x</option>
@@ -85,7 +100,8 @@ export default function AudioPlayer({ src, title }: Props) {
           ref={audioRef}
           src={src ?? undefined}
           className="w-full mt-3"
-          preload="none"
+          preload="metadata"
+          playsInline
           controls
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
         />
