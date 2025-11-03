@@ -117,27 +117,24 @@ export default function YouTubeAudioPlayer({ url, title }: Props) {
 
   return (
     <div className="w-full rounded border border-white/10 p-3 bg-black/30">
-      <div className="flex items-center justify-between gap-4">
-        <div className="truncate text-sm">
-          <span className="text-white/80">{title ?? "YouTube"}</span>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center gap-3">
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(); }}
             aria-label={playing ? "Pause" : "Play"}
-            className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 disabled:opacity-50 text-sm"
+            className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/20 disabled:opacity-50 text-base"
             title={playing ? "Pause" : "Play"}
           >
-            <span aria-hidden>{isGloballyPlaying ? "❚❚" : "►"}</span>
+            <span aria-hidden className="text-lg leading-none">{isGloballyPlaying ? "❚❚" : "►"}</span>
           </button>
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); seekBy(10); }}
             disabled={!ready}
             aria-label="Forward 10 seconds"
-            className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 disabled:opacity-50 text-sm"
+            className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/20 disabled:opacity-50 text-base"
             title="Forward 10s"
           >
-            <span aria-hidden>+10s</span>
+            <span aria-hidden className="text-sm font-medium">+10s</span>
           </button>
           <span className="text-xs text-white/60">
             {fmt(current)} / {fmt(duration)}

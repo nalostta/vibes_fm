@@ -58,28 +58,25 @@ export default function AudioPlayer({ src, title }: Props) {
 
   return (
     <div className="w-full rounded border border-white/10 p-3 bg-black/30">
-      <div className="flex items-center justify-between gap-4">
-        <div className="truncate text-sm">
-          <span className="text-white/80">{title ?? "Untitled Mix"}</span>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center gap-3">
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(); }}
             disabled={!hasSrc || loading}
             aria-label={playing ? "Pause" : "Play"}
-            className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-base"
             title={playing ? "Pause" : "Play"}
           >
-            <span aria-hidden>{loading ? "…" : (isGloballyPlaying ? "❚❚" : "►")}</span>
+            <span aria-hidden className="text-lg leading-none">{loading ? "…" : (isGloballyPlaying ? "❚❚" : "►")}</span>
           </button>
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); seekBy(10); }}
             disabled={!hasSrc || loading}
             aria-label="Forward 10 seconds"
-            className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-base"
             title="Forward 10s"
           >
-            <span aria-hidden>+10s</span>
+            <span aria-hidden className="text-sm font-medium">+10s</span>
           </button>
           <label className="text-xs text-white/70">Speed</label>
           <select

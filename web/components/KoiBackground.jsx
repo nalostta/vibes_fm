@@ -19,15 +19,12 @@ export default function KoiCometBackground() {
       { r: 200, g: 100, b: 255 }
     ];
     
-    const COMET_COUNT = 12;
-    const TRAIL_LENGTH = 300; // 3x longer trails
+    const COMET_COUNT = 8;
+    const TRAIL_LENGTH = 120;
     
     const setCanvasSize = () => {
-      const doc = document.documentElement;
-      const body = document.body;
-      const height = Math.max(doc.scrollHeight, body.scrollHeight, doc.clientHeight);
       canvas.width = window.innerWidth;
-      canvas.height = height;
+      canvas.height = window.innerHeight;
     };
     
     setCanvasSize();
@@ -115,8 +112,14 @@ export default function KoiCometBackground() {
     }
     
     let animationId;
-    function animate() {
-      ctx.fillStyle = 'rgba(10, 14, 39, 0.08)'; // further reduce darkening for ~2x perceived brightness
+    let lastTime = 0;
+    function animate(ts = 0) {
+      if (ts - lastTime < 33) { // ~30 FPS throttle
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
+      lastTime = ts;
+      ctx.fillStyle = 'rgba(10, 14, 39, 0.08)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       comets.forEach(comet => {
