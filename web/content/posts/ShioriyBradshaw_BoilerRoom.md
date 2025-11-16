@@ -6,7 +6,7 @@
   "postType": "DJ-Set",
   "draft": false,
   "tags": ["Tokyo", "Electronic", "Bass", "Hip-Hop", "Boiler Room"],
-  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/watch?v=KFmsmhNNiyY" },
+  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/KFmsmhNNiyY" },
   "tracklist": [
     "00:00 Three 6 Mafia – Stay Fly (ZUES Baile Funk Edit)",
     "Tygapaw – Applause Ha",

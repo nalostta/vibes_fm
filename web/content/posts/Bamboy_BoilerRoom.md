@@ -6,7 +6,7 @@
   "postType": "DJ-Set",
   "draft": false,
   "tags": ["Marathi", "Indian-Hip-Hop", "Hip-Hop","Bhim-Jayanti","EDM","Boiler Room"],
-  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/watch?v=zqVREgTA8D4" },
+  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/zqVREgTA8D4" },
   "tracklist": [
     "01:13 Nitesh Pawshe - Aai Mauli Cha Udo Udo (ID Remix)",
     "03:03 Neha Naaz - Khwaja Ki Diwani (DJ Aditya Arh Aradhi Style Remix)",

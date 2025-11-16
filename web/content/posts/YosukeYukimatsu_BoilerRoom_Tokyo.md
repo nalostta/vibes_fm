@@ -6,7 +6,7 @@
   "postType": "DJ-Set",
   "draft": false,
   "tags": ["Tokyo", "Electronic", "Bass", "Hip-Hop", "Boiler Room"],
-  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/watch?v=T1tcUfUhR5U&t=1928s" },
+  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/T1tcUfUhR5U?start=1928" },
   "tracklist": [
     "00:45 100 gecs - Dumbest Girl Alive",
     "02:48 Tzusing - Residual Stress",

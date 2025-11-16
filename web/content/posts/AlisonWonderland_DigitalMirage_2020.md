@@ -6,7 +6,7 @@
   "postType": "DJ-Set",
   "draft": false,
   "tags": ["Hip-Hop","Trap","EDM","Digital Mirage","Livestream","2020","Brownies & Lemonade","Proximity","Covid-Set"],
-  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/watch?v=Wa5Is8Soj_g" },
+  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/Wa5Is8Soj_g" },
   "tracklist": [
     "Alison Wonderland - Good Enough (Alison Wonderland Corona Virus Intro)",
     "02:18 Future - Mask Off (Uki & Boston Chery Refix)",

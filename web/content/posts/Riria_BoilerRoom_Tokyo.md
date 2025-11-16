@@ -6,7 +6,7 @@
   "postType": "DJ-Set",
   "draft": false,
   "tags": ["Tokyo", "Electronic", "Bass", "Hip-Hop", "Boiler Room"],
-  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/watch?v=Fa8LQLy4C5A&list=RDFa8LQLy4C5A&start_radio=1&t=2709s" },
+  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/Fa8LQLy4C5A?start=2709" },
   "tracklist": [
     "00:00 Syn- Data Dust",
     "02:08 Nan Kolè, Prynce Mini - Drop That",

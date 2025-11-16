@@ -6,7 +6,7 @@
   "postType": "DJ-Set",
   "draft": false,
   "tags": ["Bollywood", "Indian-Hip-Hop", "Hip-Hop","Indian-Pop","EDM","Boiler Room"],
-  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/watch?v=SQafz5PSEjA" },
+  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/SQafz5PSEjA" },
   "tracklist": [
     "1. Aika Dajiba(karan kanchan remix) - 1:20",
     "2. DNA - kendric lamar -  3:5      3",

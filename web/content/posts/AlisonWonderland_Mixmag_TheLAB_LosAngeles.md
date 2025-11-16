@@ -6,7 +6,7 @@
   "postType": "DJ-Set",
   "draft": false,
   "tags": ["Hip-Hop","Trap","EDM","Boiler Room"],
-  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/watch?v=HIXwkduDI3w&list=RDHIXwkduDI3w&start_radio=1&t=519s" },
+  "embed": { "type": "youtube", "url": "https://www.youtube.com/embed/HIXwkduDI3w?start=519" },
   "tracklist": [
     "Alison Wonderland ft. Wayne Coyne - U Don't Know (SLANDER Remix)",
     "Alison Wonderland ft. Fishing - Get Ready (Tasker & Leaderboy Remix) w/ Alison Wonderland ft. Wayne Coyne - U Don't Know (Acappella)",

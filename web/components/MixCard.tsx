@@ -64,6 +64,8 @@ export default function MixCard({ mix, href }: Props) {
         ) : null}
         {/* Fast rectangular overlay with highlighted play button */}
         <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
           onClick={onPlay}
           aria-label="Play"
           className="absolute inset-0 flex items-center justify-center focus:outline-none"
