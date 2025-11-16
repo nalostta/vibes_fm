@@ -162,6 +162,48 @@ export function NowPlayingProvider({ children }: { children: React.ReactNode }) 
     return () => interval && clearInterval(interval);
   }, [state.current?.type, state.current && (state.current as any).id]);
 
+  useEffect(() => {
+    const nav: any = typeof navigator !== 'undefined' ? navigator : null;
+    if (!nav || !('mediaSession' in nav)) return;
+    const cur = state.current;
+    if (!cur) {
+      nav.mediaSession.metadata = null;
+      return;
+    }
+    const title = cur.title || (cur.type === 'audio' ? cur.id : `YouTube ${cur.id}`);
+    try {
+      nav.mediaSession.metadata = new (window as any).MediaMetadata({ title });
+    } catch {}
+  }, [state.current]);
+
+  useEffect(() => {
+    const nav: any = typeof navigator !== 'undefined' ? navigator : null;
+    if (!nav || !('mediaSession' in nav)) return;
+    nav.mediaSession.playbackState = state.playing ? 'playing' : 'paused';
+  }, [state.playing]);
+
+  useEffect(() => {
+    const nav: any = typeof navigator !== 'undefined' ? navigator : null;
+    if (!nav || !('mediaSession' in nav)) return;
+    if (typeof nav.mediaSession.setPositionState === 'function') {
+      const dur = Number.isFinite(duration) ? duration : 0;
+      const pos = Number.isFinite(position) ? position : 0;
+      try { nav.mediaSession.setPositionState({ duration: Math.max(0, dur), playbackRate: 1, position: Math.max(0, pos) }); } catch {}
+    }
+  }, [position, duration, state.current && (state.current as any).id]);
+
+  useEffect(() => {
+    const nav: any = typeof navigator !== 'undefined' ? navigator : null;
+    if (!nav || !('mediaSession' in nav)) return;
+    try { nav.mediaSession.setActionHandler('play', () => toggle()); } catch {}
+    try { nav.mediaSession.setActionHandler('pause', () => toggle()); } catch {}
+    try { nav.mediaSession.setActionHandler('seekbackward', (e: any) => seekBy(-(e?.seekOffset || 10))); } catch {}
+    try { nav.mediaSession.setActionHandler('seekforward', (e: any) => seekBy(e?.seekOffset || 10)); } catch {}
+    try { nav.mediaSession.setActionHandler('previoustrack', () => prev()); } catch {}
+    try { nav.mediaSession.setActionHandler('nexttrack', () => next()); } catch {}
+    try { nav.mediaSession.setActionHandler('stop', () => stop()); } catch {}
+  }, [toggle, seekBy, next, prev, stop]);
+
   const value = useMemo(
     () => ({ state, requestPlayAudio, requestPlayYouTube, toggle, pauseAll, stop, seekBy, seekTo, next, prev, position, duration }),
     [state, position, duration]
