@@ -9,7 +9,6 @@ import sys
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Table, Index
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 # Add project root to path for shared imports
@@ -17,15 +16,15 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(o
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from shared.database import Base
+from shared.database import Base, UUID
 
 
 # Junction table for many-to-many relationship between tracks and artists (for featuring artists)
 track_artists = Table(
     'track_artists',
     Base.metadata,
-    Column('track_id', UUID(as_uuid=True), ForeignKey('tracks.track_id', ondelete='CASCADE'), primary_key=True),
-    Column('artist_id', UUID(as_uuid=True), ForeignKey('artists.artist_id', ondelete='CASCADE'), primary_key=True),
+    Column('track_id', UUID(), ForeignKey('tracks.track_id', ondelete='CASCADE'), primary_key=True),
+    Column('artist_id', UUID(), ForeignKey('artists.artist_id', ondelete='CASCADE'), primary_key=True),
     Column('is_primary', Integer, default=0)  # 1 for primary artist, 0 for featuring
 )
 
@@ -33,8 +32,8 @@ track_artists = Table(
 track_genres = Table(
     'track_genres',
     Base.metadata,
-    Column('track_id', UUID(as_uuid=True), ForeignKey('tracks.track_id', ondelete='CASCADE'), primary_key=True),
-    Column('genre_id', UUID(as_uuid=True), ForeignKey('genres.genre_id', ondelete='CASCADE'), primary_key=True)
+    Column('track_id', UUID(), ForeignKey('tracks.track_id', ondelete='CASCADE'), primary_key=True),
+    Column('genre_id', UUID(), ForeignKey('genres.genre_id', ondelete='CASCADE'), primary_key=True)
 )
 
 
@@ -52,7 +51,7 @@ class Artist(Base):
     __tablename__ = "artists"
 
     artist_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False
@@ -105,7 +104,7 @@ class Genre(Base):
     __tablename__ = "genres"
 
     genre_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False
@@ -150,7 +149,7 @@ class Album(Base):
     __tablename__ = "albums"
 
     album_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False
@@ -161,7 +160,7 @@ class Album(Base):
         index=True
     )
     artist_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("artists.artist_id", ondelete="CASCADE"),
         nullable=False,
         index=True
@@ -216,7 +215,7 @@ class Track(Base):
     __tablename__ = "tracks"
 
     track_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False
@@ -227,7 +226,7 @@ class Track(Base):
         index=True
     )
     album_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("albums.album_id", ondelete="CASCADE"),
         nullable=True,
         index=True

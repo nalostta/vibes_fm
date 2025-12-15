@@ -9,15 +9,13 @@ import sys
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Index
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
 
 # Add project root to path for shared imports
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from shared.database import Base
+from shared.database import Base, UUID
 
 
 class PlaybackHistory(Base):
@@ -42,13 +40,13 @@ class PlaybackHistory(Base):
         autoincrement=True
     )
     user_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("users.user_id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
     track_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tracks.track_id", ondelete="CASCADE"),
         nullable=False,
         index=True

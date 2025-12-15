@@ -8,7 +8,6 @@ import sys
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey, Index
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 # Add project root to path for shared imports
@@ -16,7 +15,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(o
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from shared.database import Base
+from shared.database import Base, UUID
 
 
 class Playlist(Base):
@@ -33,13 +32,13 @@ class Playlist(Base):
     __tablename__ = "playlists"
 
     playlist_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False
     )
     owner_user_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("users.user_id", ondelete="CASCADE"),
         nullable=False,
         index=True
@@ -94,13 +93,13 @@ class PlaylistTrack(Base):
         autoincrement=True
     )
     playlist_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("playlists.playlist_id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
     track_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tracks.track_id", ondelete="CASCADE"),
         nullable=False,
         index=True
@@ -150,13 +149,13 @@ class UserLibrary(Base):
     __tablename__ = "user_library"
 
     user_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("users.user_id", ondelete="CASCADE"),
         primary_key=True,
         nullable=False
     )
     track_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         ForeignKey("tracks.track_id", ondelete="CASCADE"),
         primary_key=True,
         nullable=False

@@ -8,14 +8,13 @@ import sys
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Boolean, DateTime
-from sqlalchemy.dialects.postgresql import UUID
 
 # Add project root to path for shared imports
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from shared.database import Base
+from shared.database import Base, UUID
 
 
 class User(Base):
@@ -34,7 +33,7 @@ class User(Base):
     __tablename__ = "users"
 
     user_id = Column(
-        UUID(as_uuid=True),
+        UUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False
