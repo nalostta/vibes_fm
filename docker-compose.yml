@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: vibes_fm_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: vibes_fm
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and pub/sub
+  redis:
+    image: redis:7-alpine
+    container_name: vibes_fm_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # User Service
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: vibes_fm_user_service
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    container_name: vibes_fm_auth_service
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-secret-key-change-in-production
+    ports:
+      - "8002:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Catalog Service
+  catalog-service:
+    build:
+      context: ./services/catalog-service
+      dockerfile: Dockerfile
+    container_name: vibes_fm_catalog_service
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm
+    ports:
+      - "8003:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Streaming Service
+  streaming-service:
+    build:
+      context: ./services/streaming-service
+      dockerfile: Dockerfile
+    container_name: vibes_fm_streaming_service
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm
+      CDN_BASE_URL: https://cdn.example.com
+    ports:
+      - "8004:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Library & Playlist Service
+  library-playlist-service:
+    build:
+      context: ./services/library-playlist-service
+      dockerfile: Dockerfile
+    container_name: vibes_fm_library_playlist_service
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm
+    ports:
+      - "8005:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Playback History Service
+  playback-history-service:
+    build:
+      context: ./services/playback-history-service
+      dockerfile: Dockerfile
+    container_name: vibes_fm_playback_history_service
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "8006:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
