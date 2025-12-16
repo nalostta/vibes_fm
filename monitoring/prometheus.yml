@@ -1,0 +1,50 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files: []
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:8000']
+    metrics_path: /metrics
+
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['user-service:8000']
+    metrics_path: /metrics
+
+  - job_name: 'catalog-service'
+    static_configs:
+      - targets: ['catalog-service:8000']
+    metrics_path: /metrics
+
+  - job_name: 'streaming-service'
+    static_configs:
+      - targets: ['streaming-service:8000']
+    metrics_path: /metrics
+
+  - job_name: 'library-playlist-service'
+    static_configs:
+      - targets: ['library-playlist-service:8000']
+    metrics_path: /metrics
+
+  - job_name: 'playback-history-service'
+    static_configs:
+      - targets: ['playback-history-service:8000']
+    metrics_path: /metrics
+
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:80']
+    metrics_path: /health
