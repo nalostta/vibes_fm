@@ -9,14 +9,12 @@ const streamApi = axios.create({ baseURL: `${API_BASE}/api/stream` })
 const libraryApi = axios.create({ baseURL: `${API_BASE}/api/library` })
 const historyApi = axios.create({ baseURL: `${API_BASE}/api/history` })
 
-const getAuthHeader = (token: string) => ({ Authorization: `Bearer ${token}` })
+// Use X-Vibes-Authorization to avoid collision with tunnel Basic Auth
+const getAuthHeader = (token: string) => ({ 'X-Vibes-Authorization': `Bearer ${token}` })
 
 export const authService = {
   async login(email: string, password: string) {
-    const formData = new URLSearchParams()
-    formData.append('username', email)
-    formData.append('password', password)
-    const response = await authApi.post('/login', formData)
+    const response = await authApi.post('/login', { email, password })
     return response.data
   },
 

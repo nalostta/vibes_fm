@@ -1,0 +1,14 @@
+{
+  "name": "vibes-fm-dashboard",
+  "version": "1.0.0",
+  "description": "Developer Dashboard for VIBES.FM microservices",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}
