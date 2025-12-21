@@ -395,6 +395,25 @@ app.get('/api/tests', (req, res) => {
   }
 });
 
+function getTestFiles(servicePath) {
+  const testsPath = path.join(servicePath, 'tests');
+  try {
+    return fs.readdirSync(testsPath)
+      .filter(f => f.startsWith('test_') && f.endsWith('.py'))
+      .map(f => path.join(testsPath, f));
+  } catch (e) {
+    return [];
+  }
+}
+
+function classifyTestLine(line) {
+  if (/\bPASSED\b/.test(line) && !line.includes('=')) return 'passed';
+  if (/\bFAILED\b/.test(line) && !line.includes('=')) return 'failed';
+  if (/\bSKIPPED\b/.test(line) && !line.includes('=')) return 'skipped';
+  if (/^ERROR\s/.test(line) || /\berror during collection\b/i.test(line)) return 'collection_error';
+  return 'output';
+}
+
 app.get('/api/tests/run', async (req, res) => {
   const { service } = req.query;
   
@@ -405,58 +424,87 @@ app.get('/api/tests/run', async (req, res) => {
 
   const dashboardContainer = process.env.DASHBOARD_CONTAINER_NAME || 'vibes_fm_dashboard';
   let aborted = false;
+  let currentProcess = null;
   
   req.on('close', () => {
     aborted = true;
+    if (currentProcess) {
+      currentProcess.kill('SIGTERM');
+    }
   });
 
+  const runTestFile = (testFile, displayName) => {
+    return new Promise((resolve) => {
+      res.write(`data: ${JSON.stringify({ type: 'output', content: `\n--- Running: ${displayName} ---` })}\n\n`);
+      
+      currentProcess = spawn('docker', [
+        'run', '--rm',
+        '--volumes-from', dashboardContainer,
+        '-w', WORKSPACE_PATH,
+        '-e', 'PYTHONDONTWRITEBYTECODE=1',
+        'python:3.11-slim',
+        'sh', '-c',
+        `pip install -q -r requirements.txt && python -m pytest ${testFile} -v --tb=short -o cache_dir=/tmp/pytest_cache 2>&1`
+      ]);
+
+      currentProcess.stdout.on('data', (data) => {
+        if (aborted) return;
+        const lines = data.toString().split('\n').filter(line => line.trim());
+        lines.forEach(line => {
+          const type = classifyTestLine(line);
+          res.write(`data: ${JSON.stringify({ type, content: line })}\n\n`);
+        });
+      });
+
+      currentProcess.stderr.on('data', (data) => {
+        if (aborted) return;
+        const lines = data.toString().split('\n').filter(line => line.trim());
+        lines.forEach(line => {
+          res.write(`data: ${JSON.stringify({ type: 'output', content: line })}\n\n`);
+        });
+      });
+
+      currentProcess.on('error', (error) => {
+        res.write(`data: ${JSON.stringify({ type: 'collection_error', content: error.message })}\n\n`);
+        currentProcess = null;
+        resolve(1);
+      });
+
+      currentProcess.on('close', (code) => {
+        currentProcess = null;
+        resolve(code);
+      });
+    });
+  };
+
   if (service) {
-    const testTarget = `services/${service}/tests`;
-    res.write(`data: ${JSON.stringify({ type: 'started', target: service })}\n\n`);
+    const servicePath = path.join(WORKSPACE_PATH, 'services', service);
+    const testFiles = getTestFiles(servicePath);
     
-    const testProcess = spawn('docker', [
-      'run', '--rm',
-      '--volumes-from', dashboardContainer,
-      '-w', WORKSPACE_PATH,
-      '-e', 'PYTHONDONTWRITEBYTECODE=1',
-      'python:3.11-slim',
-      'sh', '-c',
-      `pip install -q -r requirements.txt && python -m pytest ${testTarget} -v --tb=short -o cache_dir=/tmp/pytest_cache 2>&1`
-    ]);
-
-    testProcess.stdout.on('data', (data) => {
-      const lines = data.toString().split('\n').filter(line => line.trim());
-      lines.forEach(line => {
-        let type = 'output';
-        if (line.includes('PASSED')) type = 'passed';
-        else if (line.includes('FAILED')) type = 'failed';
-        else if (line.includes('ERROR')) type = 'error';
-        else if (line.includes('SKIPPED')) type = 'skipped';
-        res.write(`data: ${JSON.stringify({ type, content: line })}\n\n`);
-      });
-    });
-
-    testProcess.stderr.on('data', (data) => {
-      const lines = data.toString().split('\n').filter(line => line.trim());
-      lines.forEach(line => {
-        res.write(`data: ${JSON.stringify({ type: 'output', content: line })}\n\n`);
-      });
-    });
-
-    testProcess.on('error', (error) => {
-      res.write(`data: ${JSON.stringify({ type: 'error', content: error.message })}\n\n`);
-    });
-
-    testProcess.on('close', (code) => {
-      res.write(`data: ${JSON.stringify({ type: 'completed', code: code, success: code === 0 })}\n\n`);
+    if (testFiles.length === 0) {
+      res.write(`data: ${JSON.stringify({ type: 'started', target: service })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'output', content: 'No test files found' })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'completed', code: 0, success: true })}\n\n`);
       res.end();
-    });
+      return;
+    }
 
-    req.on('close', () => {
-      testProcess.kill('SIGTERM');
-    });
+    res.write(`data: ${JSON.stringify({ type: 'started', target: `${service} (${testFiles.length} test files, running each in isolation)` })}\n\n`);
+    
+    let overallSuccess = true;
+    for (const testFile of testFiles) {
+      if (aborted) break;
+      const relativePath = testFile.replace(WORKSPACE_PATH + '/', '');
+      const exitCode = await runTestFile(relativePath, path.basename(testFile));
+      if (exitCode !== 0) overallSuccess = false;
+    }
+
+    if (!aborted) {
+      res.write(`data: ${JSON.stringify({ type: 'completed', code: overallSuccess ? 0 : 1, success: overallSuccess })}\n\n`);
+      res.end();
+    }
   } else {
-    res.write(`data: ${JSON.stringify({ type: 'started', target: 'all services (running each in isolation)' })}\n\n`);
+    res.write(`data: ${JSON.stringify({ type: 'started', target: 'all services (running each test file in isolation)' })}\n\n`);
     
     const servicesPath = path.join(WORKSPACE_PATH, 'services');
     let services = [];
@@ -465,7 +513,7 @@ app.get('/api/tests/run', async (req, res) => {
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name);
     } catch (e) {
-      res.write(`data: ${JSON.stringify({ type: 'error', content: 'Failed to read services directory' })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'collection_error', content: 'Failed to read services directory' })}\n\n`);
       res.write(`data: ${JSON.stringify({ type: 'completed', code: 1, success: false })}\n\n`);
       res.end();
       return;
@@ -476,60 +524,23 @@ app.get('/api/tests/run', async (req, res) => {
     for (const svc of services) {
       if (aborted) break;
       
-      const testTarget = `services/${svc}/tests`;
+      const servicePath = path.join(servicesPath, svc);
+      const testFiles = getTestFiles(servicePath);
+      
       res.write(`data: ${JSON.stringify({ type: 'output', content: `\n${'='.repeat(60)}` })}\n\n`);
-      res.write(`data: ${JSON.stringify({ type: 'output', content: `Running tests for: ${svc}` })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'output', content: `Service: ${svc} (${testFiles.length} test files)` })}\n\n`);
       res.write(`data: ${JSON.stringify({ type: 'output', content: `${'='.repeat(60)}` })}\n\n`);
       
-      const exitCode = await new Promise((resolve) => {
-        const testProcess = spawn('docker', [
-          'run', '--rm',
-          '--volumes-from', dashboardContainer,
-          '-w', WORKSPACE_PATH,
-          '-e', 'PYTHONDONTWRITEBYTECODE=1',
-          'python:3.11-slim',
-          'sh', '-c',
-          `pip install -q -r requirements.txt && python -m pytest ${testTarget} -v --tb=short -o cache_dir=/tmp/pytest_cache 2>&1`
-        ]);
+      if (testFiles.length === 0) {
+        res.write(`data: ${JSON.stringify({ type: 'output', content: 'No test files found' })}\n\n`);
+        continue;
+      }
 
-        testProcess.stdout.on('data', (data) => {
-          if (aborted) return;
-          const lines = data.toString().split('\n').filter(line => line.trim());
-          lines.forEach(line => {
-            let type = 'output';
-            if (line.includes('PASSED')) type = 'passed';
-            else if (line.includes('FAILED')) type = 'failed';
-            else if (line.includes('ERROR')) type = 'error';
-            else if (line.includes('SKIPPED')) type = 'skipped';
-            res.write(`data: ${JSON.stringify({ type, content: line })}\n\n`);
-          });
-        });
-
-        testProcess.stderr.on('data', (data) => {
-          if (aborted) return;
-          const lines = data.toString().split('\n').filter(line => line.trim());
-          lines.forEach(line => {
-            res.write(`data: ${JSON.stringify({ type: 'output', content: line })}\n\n`);
-          });
-        });
-
-        testProcess.on('error', (error) => {
-          res.write(`data: ${JSON.stringify({ type: 'error', content: error.message })}\n\n`);
-          resolve(1);
-        });
-
-        testProcess.on('close', (code) => {
-          resolve(code);
-        });
-
-        req.on('close', () => {
-          testProcess.kill('SIGTERM');
-          resolve(-1);
-        });
-      });
-
-      if (exitCode !== 0) {
-        overallSuccess = false;
+      for (const testFile of testFiles) {
+        if (aborted) break;
+        const relativePath = testFile.replace(WORKSPACE_PATH + '/', '');
+        const exitCode = await runTestFile(relativePath, path.basename(testFile));
+        if (exitCode !== 0) overallSuccess = false;
       }
     }
 

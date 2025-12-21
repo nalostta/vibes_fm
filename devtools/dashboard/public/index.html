@@ -502,6 +502,10 @@
       border-left: 3px solid var(--warning);
     }
 
+    .test-stat.errors {
+      border-left: 3px solid #ff6b35;
+    }
+
     .test-stat.total {
       border-left: 3px solid var(--accent);
     }
@@ -522,6 +526,10 @@
 
     .test-stat.skipped .test-stat-value {
       color: var(--warning);
+    }
+
+    .test-stat.errors .test-stat-value {
+      color: #ff6b35;
     }
 
     .test-stat.total .test-stat-value {
@@ -552,6 +560,11 @@
 
     .test-line.skipped {
       color: var(--warning);
+    }
+
+    .test-line.collection_error {
+      color: #ff6b35;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -639,6 +652,10 @@
             <div class="test-stat skipped">
               <span class="test-stat-value" id="testsSkipped">0</span>
               <span class="test-stat-label">Skipped</span>
+            </div>
+            <div class="test-stat errors">
+              <span class="test-stat-value" id="testsErrors">0</span>
+              <span class="test-stat-label">Errors</span>
             </div>
             <div class="test-stat total">
               <span class="test-stat-value" id="testsTotal">0</span>
@@ -1026,10 +1043,11 @@
     }
 
     function resetTestStats() {
-      testStats = { passed: 0, failed: 0, skipped: 0, total: 0 };
+      testStats = { passed: 0, failed: 0, skipped: 0, errors: 0, total: 0 };
       document.getElementById('testsPassed').textContent = '0';
       document.getElementById('testsFailed').textContent = '0';
       document.getElementById('testsSkipped').textContent = '0';
+      document.getElementById('testsErrors').textContent = '0';
       document.getElementById('testsTotal').textContent = '0';
     }
 
@@ -1037,11 +1055,13 @@
       if (type === 'passed') testStats.passed++;
       else if (type === 'failed') testStats.failed++;
       else if (type === 'skipped') testStats.skipped++;
-      testStats.total = testStats.passed + testStats.failed + testStats.skipped;
+      else if (type === 'collection_error') testStats.errors++;
+      testStats.total = testStats.passed + testStats.failed + testStats.skipped + testStats.errors;
       
       document.getElementById('testsPassed').textContent = testStats.passed;
       document.getElementById('testsFailed').textContent = testStats.failed;
       document.getElementById('testsSkipped').textContent = testStats.skipped;
+      document.getElementById('testsErrors').textContent = testStats.errors;
       document.getElementById('testsTotal').textContent = testStats.total;
     }
 
@@ -1077,13 +1097,13 @@
         
         if (data.type === 'started') {
           testStatus.innerHTML = `<div class="spinner"></div><span>Running tests for ${data.target}...</span>`;
-        } else if (data.type === 'output' || data.type === 'passed' || data.type === 'failed' || data.type === 'error' || data.type === 'skipped') {
+        } else if (data.type === 'output' || data.type === 'passed' || data.type === 'failed' || data.type === 'error' || data.type === 'skipped' || data.type === 'collection_error') {
           const line = document.createElement('div');
           line.className = `test-line ${data.type}`;
           line.textContent = data.content;
           testOutput.appendChild(line);
           
-          if (data.type === 'passed' || data.type === 'failed' || data.type === 'skipped') {
+          if (data.type === 'passed' || data.type === 'failed' || data.type === 'skipped' || data.type === 'collection_error') {
             updateTestStats(data.type);
           }
           
@@ -1091,8 +1111,9 @@
             testOutput.scrollTop = testOutput.scrollHeight;
           }
         } else if (data.type === 'completed') {
-          const status = data.success ? 'Tests completed successfully' : 'Tests completed with failures';
-          const statusColor = data.success ? 'var(--success)' : 'var(--error)';
+          const hasErrors = testStats.failed > 0 || testStats.errors > 0;
+          const status = hasErrors ? 'Tests completed with failures/errors' : 'Tests completed successfully';
+          const statusColor = hasErrors ? 'var(--error)' : 'var(--success)';
           testStatus.innerHTML = `<span style="color: ${statusColor}">${status}</span>`;
           stopTests();
         }
