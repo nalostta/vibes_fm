@@ -1,0 +1,28 @@
+{
+  "modules": [
+    {
+      "name": "web",
+      "displayName": "Next.js Dev Server",
+      "service": "web",
+      "description": "The main VIBES.FM Next.js application",
+      "healthCheck": {
+        "enabled": true,
+        "url": "http://web:3000",
+        "interval": 5000
+      },
+      "ports": ["3000:3000"]
+    },
+    {
+      "name": "dashboard",
+      "displayName": "Developer Dashboard",
+      "service": "dashboard",
+      "description": "Development monitoring and management dashboard",
+      "healthCheck": {
+        "enabled": true,
+        "url": "http://localhost:7331/api/health",
+        "interval": 5000
+      },
+      "ports": ["7331:7331"]
+    }
+  ]
+}
