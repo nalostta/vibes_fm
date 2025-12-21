@@ -163,6 +163,26 @@ services:
       - playback-history-service
       - frontend
 
+  # Developer Dashboard
+  dashboard:
+    build:
+      context: ./devtools/dashboard
+      dockerfile: Dockerfile
+    container_name: vibes_fm_dashboard
+    ports:
+      - "127.0.0.1:7331:7331"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./devtools/modules.json:/app/modules.json:ro
+      - .:/workspace:ro
+    environment:
+      - DASHBOARD_PORT=7331
+      - COMPOSE_PROJECT_NAME=vibes_fm
+      - WORKSPACE_PATH=/workspace
+    working_dir: /app
+    profiles:
+      - devtools
+
 volumes:
   postgres_data:
   redis_data:

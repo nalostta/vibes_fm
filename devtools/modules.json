@@ -1,0 +1,140 @@
+{
+  "modules": [
+    {
+      "name": "postgres",
+      "displayName": "PostgreSQL Database",
+      "service": "postgres",
+      "type": "service",
+      "description": "PostgreSQL 15 database for persistent data storage",
+      "healthCheck": {
+        "enabled": false
+      },
+      "ports": ["5432:5432"],
+      "category": "Infrastructure"
+    },
+    {
+      "name": "redis",
+      "displayName": "Redis Cache",
+      "service": "redis",
+      "type": "service",
+      "description": "Redis 7 for caching and pub/sub messaging",
+      "healthCheck": {
+        "enabled": false
+      },
+      "ports": ["6379:6379"],
+      "category": "Infrastructure"
+    },
+    {
+      "name": "user-service",
+      "displayName": "User Service",
+      "service": "user-service",
+      "type": "service",
+      "description": "User management and profile service",
+      "healthCheck": {
+        "enabled": true,
+        "url": "http://user-service:8000/health",
+        "interval": 5000
+      },
+      "ports": ["8001:8000"],
+      "category": "Core Services"
+    },
+    {
+      "name": "auth-service",
+      "displayName": "Auth Service",
+      "service": "auth-service",
+      "type": "service",
+      "description": "Authentication and JWT token management",
+      "healthCheck": {
+        "enabled": true,
+        "url": "http://auth-service:8000/health",
+        "interval": 5000
+      },
+      "ports": ["8002:8000"],
+      "category": "Core Services"
+    },
+    {
+      "name": "catalog-service",
+      "displayName": "Catalog Service",
+      "service": "catalog-service",
+      "type": "service",
+      "description": "Music catalog and metadata management",
+      "healthCheck": {
+        "enabled": true,
+        "url": "http://catalog-service:8000/health",
+        "interval": 5000
+      },
+      "ports": ["8003:8000"],
+      "category": "Core Services"
+    },
+    {
+      "name": "streaming-service",
+      "displayName": "Streaming Service",
+      "service": "streaming-service",
+      "type": "service",
+      "description": "Audio streaming and CDN integration",
+      "healthCheck": {
+        "enabled": true,
+        "url": "http://streaming-service:8000/health",
+        "interval": 5000
+      },
+      "ports": ["8004:8000"],
+      "category": "Core Services"
+    },
+    {
+      "name": "library-playlist-service",
+      "displayName": "Library & Playlist Service",
+      "service": "library-playlist-service",
+      "type": "service",
+      "description": "User library and playlist management",
+      "healthCheck": {
+        "enabled": true,
+        "url": "http://library-playlist-service:8000/health",
+        "interval": 5000
+      },
+      "ports": ["8005:8000"],
+      "category": "Core Services"
+    },
+    {
+      "name": "playback-history-service",
+      "displayName": "Playback History Service",
+      "service": "playback-history-service",
+      "type": "service",
+      "description": "Track listening history and analytics",
+      "healthCheck": {
+        "enabled": true,
+        "url": "http://playback-history-service:8000/health",
+        "interval": 5000
+      },
+      "ports": ["8006:8000"],
+      "category": "Core Services"
+    },
+    {
+      "name": "frontend",
+      "displayName": "Frontend Web App",
+      "service": "frontend",
+      "type": "service",
+      "description": "Vite-based React frontend application",
+      "healthCheck": {
+        "enabled": true,
+        "url": "http://frontend:80",
+        "interval": 5000
+      },
+      "ports": ["3000:80"],
+      "category": "Frontend"
+    },
+    {
+      "name": "nginx",
+      "displayName": "Nginx API Gateway",
+      "service": "nginx",
+      "type": "service",
+      "description": "API gateway and reverse proxy",
+      "healthCheck": {
+        "enabled": true,
+        "url": "http://nginx:80",
+        "interval": 5000
+      },
+      "ports": ["80:80"],
+      "category": "Infrastructure"
+    }
+  ]
+}
