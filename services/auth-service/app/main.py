@@ -6,8 +6,6 @@ Handles user authentication including:
 - User login with JWT token generation
 - Token validation
 """
-import os
-import sys
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from uuid import UUID
@@ -15,11 +13,6 @@ from uuid import UUID
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-
-# Add project root to path for shared imports
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
 
 from shared.database import Base, engine, get_db
 from shared.auth import (
@@ -29,16 +22,7 @@ from shared.auth import (
     decode_access_token,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
-
-# Import User model using importlib due to hyphenated directory names
-import importlib.util
-spec = importlib.util.spec_from_file_location(
-    "user",
-    os.path.join(PROJECT_ROOT, "services/user-service/app/models/user.py")
-)
-user_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(user_module)
-User = user_module.User
+from shared.models import User
 
 from .schemas import (
     UserRegisterRequest,
