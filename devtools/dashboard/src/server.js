@@ -408,13 +408,15 @@ app.get('/api/tests/run', (req, res) => {
   
   res.write(`data: ${JSON.stringify({ type: 'started', target: displayName })}\n\n`);
 
+  const dashboardContainer = process.env.DASHBOARD_CONTAINER_NAME || 'vibes_fm_dashboard';
   const testProcess = spawn('docker', [
     'run', '--rm',
-    '-v', `${WORKSPACE_PATH}:/app`,
-    '-w', '/app',
+    '--volumes-from', dashboardContainer,
+    '-w', WORKSPACE_PATH,
+    '-e', 'PYTHONDONTWRITEBYTECODE=1',
     'python:3.11-slim',
     'sh', '-c',
-    `pip install -q pytest pytest-asyncio sqlalchemy psycopg2-binary pydantic pydantic-settings python-jose passlib httpx redis && python -m pytest ${testTarget} -v --tb=short 2>&1`
+    `pip install -q -r requirements.txt && python -m pytest ${testTarget} -v --tb=short -o cache_dir=/tmp/pytest_cache 2>&1`
   ]);
 
   testProcess.stdout.on('data', (data) => {
