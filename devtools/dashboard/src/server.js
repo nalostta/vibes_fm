@@ -395,7 +395,7 @@ app.get('/api/tests', (req, res) => {
   }
 });
 
-app.get('/api/tests/run', (req, res) => {
+app.get('/api/tests/run', async (req, res) => {
   const { service } = req.query;
   
   res.setHeader('Content-Type', 'text/event-stream');
@@ -403,53 +403,141 @@ app.get('/api/tests/run', (req, res) => {
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('X-Accel-Buffering', 'no');
 
-  const testTarget = service ? `services/${service}/tests` : 'services';
-  const displayName = service || 'all services';
-  
-  res.write(`data: ${JSON.stringify({ type: 'started', target: displayName })}\n\n`);
-
   const dashboardContainer = process.env.DASHBOARD_CONTAINER_NAME || 'vibes_fm_dashboard';
-  const testProcess = spawn('docker', [
-    'run', '--rm',
-    '--volumes-from', dashboardContainer,
-    '-w', WORKSPACE_PATH,
-    '-e', 'PYTHONDONTWRITEBYTECODE=1',
-    'python:3.11-slim',
-    'sh', '-c',
-    `pip install -q -r requirements.txt && python -m pytest ${testTarget} -v --tb=short -o cache_dir=/tmp/pytest_cache 2>&1`
-  ]);
-
-  testProcess.stdout.on('data', (data) => {
-    const lines = data.toString().split('\n').filter(line => line.trim());
-    lines.forEach(line => {
-      let type = 'output';
-      if (line.includes('PASSED')) type = 'passed';
-      else if (line.includes('FAILED')) type = 'failed';
-      else if (line.includes('ERROR')) type = 'error';
-      else if (line.includes('SKIPPED')) type = 'skipped';
-      res.write(`data: ${JSON.stringify({ type, content: line })}\n\n`);
-    });
-  });
-
-  testProcess.stderr.on('data', (data) => {
-    const lines = data.toString().split('\n').filter(line => line.trim());
-    lines.forEach(line => {
-      res.write(`data: ${JSON.stringify({ type: 'output', content: line })}\n\n`);
-    });
-  });
-
-  testProcess.on('error', (error) => {
-    res.write(`data: ${JSON.stringify({ type: 'error', content: error.message })}\n\n`);
-  });
-
-  testProcess.on('close', (code) => {
-    res.write(`data: ${JSON.stringify({ type: 'completed', code: code, success: code === 0 })}\n\n`);
-    res.end();
-  });
-
+  let aborted = false;
+  
   req.on('close', () => {
-    testProcess.kill('SIGTERM');
+    aborted = true;
   });
+
+  if (service) {
+    const testTarget = `services/${service}/tests`;
+    res.write(`data: ${JSON.stringify({ type: 'started', target: service })}\n\n`);
+    
+    const testProcess = spawn('docker', [
+      'run', '--rm',
+      '--volumes-from', dashboardContainer,
+      '-w', WORKSPACE_PATH,
+      '-e', 'PYTHONDONTWRITEBYTECODE=1',
+      'python:3.11-slim',
+      'sh', '-c',
+      `pip install -q -r requirements.txt && python -m pytest ${testTarget} -v --tb=short -o cache_dir=/tmp/pytest_cache 2>&1`
+    ]);
+
+    testProcess.stdout.on('data', (data) => {
+      const lines = data.toString().split('\n').filter(line => line.trim());
+      lines.forEach(line => {
+        let type = 'output';
+        if (line.includes('PASSED')) type = 'passed';
+        else if (line.includes('FAILED')) type = 'failed';
+        else if (line.includes('ERROR')) type = 'error';
+        else if (line.includes('SKIPPED')) type = 'skipped';
+        res.write(`data: ${JSON.stringify({ type, content: line })}\n\n`);
+      });
+    });
+
+    testProcess.stderr.on('data', (data) => {
+      const lines = data.toString().split('\n').filter(line => line.trim());
+      lines.forEach(line => {
+        res.write(`data: ${JSON.stringify({ type: 'output', content: line })}\n\n`);
+      });
+    });
+
+    testProcess.on('error', (error) => {
+      res.write(`data: ${JSON.stringify({ type: 'error', content: error.message })}\n\n`);
+    });
+
+    testProcess.on('close', (code) => {
+      res.write(`data: ${JSON.stringify({ type: 'completed', code: code, success: code === 0 })}\n\n`);
+      res.end();
+    });
+
+    req.on('close', () => {
+      testProcess.kill('SIGTERM');
+    });
+  } else {
+    res.write(`data: ${JSON.stringify({ type: 'started', target: 'all services (running each in isolation)' })}\n\n`);
+    
+    const servicesPath = path.join(WORKSPACE_PATH, 'services');
+    let services = [];
+    try {
+      services = fs.readdirSync(servicesPath, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name);
+    } catch (e) {
+      res.write(`data: ${JSON.stringify({ type: 'error', content: 'Failed to read services directory' })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'completed', code: 1, success: false })}\n\n`);
+      res.end();
+      return;
+    }
+
+    let overallSuccess = true;
+    
+    for (const svc of services) {
+      if (aborted) break;
+      
+      const testTarget = `services/${svc}/tests`;
+      res.write(`data: ${JSON.stringify({ type: 'output', content: `\n${'='.repeat(60)}` })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'output', content: `Running tests for: ${svc}` })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'output', content: `${'='.repeat(60)}` })}\n\n`);
+      
+      const exitCode = await new Promise((resolve) => {
+        const testProcess = spawn('docker', [
+          'run', '--rm',
+          '--volumes-from', dashboardContainer,
+          '-w', WORKSPACE_PATH,
+          '-e', 'PYTHONDONTWRITEBYTECODE=1',
+          'python:3.11-slim',
+          'sh', '-c',
+          `pip install -q -r requirements.txt && python -m pytest ${testTarget} -v --tb=short -o cache_dir=/tmp/pytest_cache 2>&1`
+        ]);
+
+        testProcess.stdout.on('data', (data) => {
+          if (aborted) return;
+          const lines = data.toString().split('\n').filter(line => line.trim());
+          lines.forEach(line => {
+            let type = 'output';
+            if (line.includes('PASSED')) type = 'passed';
+            else if (line.includes('FAILED')) type = 'failed';
+            else if (line.includes('ERROR')) type = 'error';
+            else if (line.includes('SKIPPED')) type = 'skipped';
+            res.write(`data: ${JSON.stringify({ type, content: line })}\n\n`);
+          });
+        });
+
+        testProcess.stderr.on('data', (data) => {
+          if (aborted) return;
+          const lines = data.toString().split('\n').filter(line => line.trim());
+          lines.forEach(line => {
+            res.write(`data: ${JSON.stringify({ type: 'output', content: line })}\n\n`);
+          });
+        });
+
+        testProcess.on('error', (error) => {
+          res.write(`data: ${JSON.stringify({ type: 'error', content: error.message })}\n\n`);
+          resolve(1);
+        });
+
+        testProcess.on('close', (code) => {
+          resolve(code);
+        });
+
+        req.on('close', () => {
+          testProcess.kill('SIGTERM');
+          resolve(-1);
+        });
+      });
+
+      if (exitCode !== 0) {
+        overallSuccess = false;
+      }
+    }
+
+    if (!aborted) {
+      res.write(`data: ${JSON.stringify({ type: 'completed', code: overallSuccess ? 0 : 1, success: overallSuccess })}\n\n`);
+      res.end();
+    }
+  }
 });
 
 app.get('*', (req, res) => {
