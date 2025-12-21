@@ -36,8 +36,8 @@ services:
   # User Service
   user-service:
     build:
-      context: ./services/user-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/user-service/Dockerfile
     container_name: vibes_fm_user_service
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm
@@ -53,8 +53,8 @@ services:
   # Auth Service
   auth-service:
     build:
-      context: ./services/auth-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/auth-service/Dockerfile
     container_name: vibes_fm_auth_service
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm
@@ -71,8 +71,8 @@ services:
   # Catalog Service
   catalog-service:
     build:
-      context: ./services/catalog-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/catalog-service/Dockerfile
     container_name: vibes_fm_catalog_service
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm
@@ -85,8 +85,8 @@ services:
   # Streaming Service
   streaming-service:
     build:
-      context: ./services/streaming-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/streaming-service/Dockerfile
     container_name: vibes_fm_streaming_service
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm
@@ -100,8 +100,8 @@ services:
   # Library & Playlist Service
   library-playlist-service:
     build:
-      context: ./services/library-playlist-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/library-playlist-service/Dockerfile
     container_name: vibes_fm_library_playlist_service
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm
@@ -114,8 +114,8 @@ services:
   # Playback History Service
   playback-history-service:
     build:
-      context: ./services/playback-history-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/playback-history-service/Dockerfile
     container_name: vibes_fm_playback_history_service
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibes_fm

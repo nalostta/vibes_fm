@@ -7,8 +7,6 @@ Handles user profile management including:
 - Password changes
 - Premium status management
 """
-import os
-import sys
 from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID
@@ -17,15 +15,9 @@ from fastapi import FastAPI, HTTPException, Depends, status, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-# Add project root to path for shared imports
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
-
 from shared.database import Base, engine, get_db
 from shared.auth import verify_password, get_password_hash, decode_access_token
-
-from .models.user import User
+from shared.models import User
 from .schemas import (
     UserProfileResponse,
     UserProfileUpdateRequest,
