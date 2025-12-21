@@ -369,6 +369,87 @@ app.get('/api/modules/:name/logs', (req, res) => {
   });
 });
 
+app.get('/api/tests', (req, res) => {
+  const servicesPath = path.join(WORKSPACE_PATH, 'services');
+  try {
+    const services = fs.readdirSync(servicesPath, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => {
+        const testsPath = path.join(servicesPath, dirent.name, 'tests');
+        let testFiles = [];
+        try {
+          testFiles = fs.readdirSync(testsPath)
+            .filter(f => f.startsWith('test_') && f.endsWith('.py'));
+        } catch (e) {}
+        return {
+          name: dirent.name,
+          displayName: dirent.name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+          testPath: `services/${dirent.name}/tests`,
+          testFiles: testFiles,
+          testCount: testFiles.length
+        };
+      });
+    res.json({ services, timestamp: new Date().toISOString() });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/tests/run', (req, res) => {
+  const { service } = req.query;
+  
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+
+  const testTarget = service ? `services/${service}/tests` : 'services';
+  const displayName = service || 'all services';
+  
+  res.write(`data: ${JSON.stringify({ type: 'started', target: displayName })}\n\n`);
+
+  const testProcess = spawn('docker', [
+    'run', '--rm',
+    '-v', `${WORKSPACE_PATH}:/app`,
+    '-w', '/app',
+    'python:3.11-slim',
+    'sh', '-c',
+    `pip install -q pytest pytest-asyncio sqlalchemy psycopg2-binary pydantic pydantic-settings python-jose passlib httpx redis && python -m pytest ${testTarget} -v --tb=short 2>&1`
+  ]);
+
+  testProcess.stdout.on('data', (data) => {
+    const lines = data.toString().split('\n').filter(line => line.trim());
+    lines.forEach(line => {
+      let type = 'output';
+      if (line.includes('PASSED')) type = 'passed';
+      else if (line.includes('FAILED')) type = 'failed';
+      else if (line.includes('ERROR')) type = 'error';
+      else if (line.includes('SKIPPED')) type = 'skipped';
+      res.write(`data: ${JSON.stringify({ type, content: line })}\n\n`);
+    });
+  });
+
+  testProcess.stderr.on('data', (data) => {
+    const lines = data.toString().split('\n').filter(line => line.trim());
+    lines.forEach(line => {
+      res.write(`data: ${JSON.stringify({ type: 'output', content: line })}\n\n`);
+    });
+  });
+
+  testProcess.on('error', (error) => {
+    res.write(`data: ${JSON.stringify({ type: 'error', content: error.message })}\n\n`);
+  });
+
+  testProcess.on('close', (code) => {
+    res.write(`data: ${JSON.stringify({ type: 'completed', code: code, success: code === 0 })}\n\n`);
+    res.end();
+  });
+
+  req.on('close', () => {
+    testProcess.kill('SIGTERM');
+  });
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });

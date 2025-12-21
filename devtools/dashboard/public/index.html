@@ -468,6 +468,91 @@
     .toast.error {
       border-color: var(--error);
     }
+
+    .test-summary {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .test-stats {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+    }
+
+    .test-stat {
+      text-align: center;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      background-color: var(--bg-tertiary);
+    }
+
+    .test-stat.passed {
+      border-left: 3px solid var(--success);
+    }
+
+    .test-stat.failed {
+      border-left: 3px solid var(--error);
+    }
+
+    .test-stat.skipped {
+      border-left: 3px solid var(--warning);
+    }
+
+    .test-stat.total {
+      border-left: 3px solid var(--accent);
+    }
+
+    .test-stat-value {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .test-stat.passed .test-stat-value {
+      color: var(--success);
+    }
+
+    .test-stat.failed .test-stat-value {
+      color: var(--error);
+    }
+
+    .test-stat.skipped .test-stat-value {
+      color: var(--warning);
+    }
+
+    .test-stat.total .test-stat-value {
+      color: var(--accent);
+    }
+
+    .test-stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .test-line {
+      padding: 0.125rem 0;
+    }
+
+    .test-line.passed {
+      color: var(--success);
+    }
+
+    .test-line.failed {
+      color: var(--error);
+    }
+
+    .test-line.error {
+      color: var(--error);
+    }
+
+    .test-line.skipped {
+      color: var(--warning);
+    }
   </style>
 </head>
 <body>
@@ -486,6 +571,7 @@
   <nav class="tabs">
     <div class="tab active" data-tab="overview">Overview</div>
     <div class="tab" data-tab="logs">Logs</div>
+    <div class="tab" data-tab="tests">Tests</div>
     <div class="tab" data-tab="settings">Settings</div>
   </nav>
 
@@ -523,6 +609,55 @@
           <div class="logs-content" id="logsContent">
             <div class="empty-state">
               <p>No logs to display. Select a module and start streaming.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tests" class="tab-content">
+      <div class="logs-container">
+        <div class="logs-header">
+          <h2>Run Tests</h2>
+          <div class="logs-controls">
+            <select class="module-select" id="testServiceSelect">
+              <option value="">All Services</option>
+            </select>
+            <button class="btn btn-primary" id="runTestsBtn">Run Tests</button>
+          </div>
+        </div>
+        <div class="test-summary" id="testSummary" style="display: none;">
+          <div class="test-stats">
+            <div class="test-stat passed">
+              <span class="test-stat-value" id="testsPassed">0</span>
+              <span class="test-stat-label">Passed</span>
+            </div>
+            <div class="test-stat failed">
+              <span class="test-stat-value" id="testsFailed">0</span>
+              <span class="test-stat-label">Failed</span>
+            </div>
+            <div class="test-stat skipped">
+              <span class="test-stat-value" id="testsSkipped">0</span>
+              <span class="test-stat-label">Skipped</span>
+            </div>
+            <div class="test-stat total">
+              <span class="test-stat-value" id="testsTotal">0</span>
+              <span class="test-stat-label">Total</span>
+            </div>
+          </div>
+        </div>
+        <div class="logs-viewer">
+          <div class="logs-toolbar">
+            <div class="logs-status" id="testStatus">
+              <span>Select a service or run all tests</span>
+            </div>
+            <label>
+              <input type="checkbox" id="testAutoScrollCheck" checked> Auto-scroll
+            </label>
+          </div>
+          <div class="logs-content" id="testOutput">
+            <div class="empty-state">
+              <p>No test output. Click "Run Tests" to execute tests.</p>
             </div>
           </div>
         </div>
@@ -868,12 +1003,129 @@
       }
     }
 
+    let testServices = [];
+    let currentTestStream = null;
+    let isTestRunning = false;
+    let testStats = { passed: 0, failed: 0, skipped: 0, total: 0 };
+
+    async function fetchTestServices() {
+      try {
+        const response = await fetch('/api/tests');
+        const data = await response.json();
+        testServices = data.services;
+        updateTestServiceSelect();
+      } catch (error) {
+        console.error('Error fetching test services:', error);
+      }
+    }
+
+    function updateTestServiceSelect() {
+      const select = document.getElementById('testServiceSelect');
+      select.innerHTML = '<option value="">All Services</option>' +
+        testServices.map(s => `<option value="${s.name}">${s.displayName} (${s.testCount} tests)</option>`).join('');
+    }
+
+    function resetTestStats() {
+      testStats = { passed: 0, failed: 0, skipped: 0, total: 0 };
+      document.getElementById('testsPassed').textContent = '0';
+      document.getElementById('testsFailed').textContent = '0';
+      document.getElementById('testsSkipped').textContent = '0';
+      document.getElementById('testsTotal').textContent = '0';
+    }
+
+    function updateTestStats(type) {
+      if (type === 'passed') testStats.passed++;
+      else if (type === 'failed') testStats.failed++;
+      else if (type === 'skipped') testStats.skipped++;
+      testStats.total = testStats.passed + testStats.failed + testStats.skipped;
+      
+      document.getElementById('testsPassed').textContent = testStats.passed;
+      document.getElementById('testsFailed').textContent = testStats.failed;
+      document.getElementById('testsSkipped').textContent = testStats.skipped;
+      document.getElementById('testsTotal').textContent = testStats.total;
+    }
+
+    function runTests() {
+      if (isTestRunning) {
+        stopTests();
+        return;
+      }
+
+      const service = document.getElementById('testServiceSelect').value;
+      const testOutput = document.getElementById('testOutput');
+      const testStatus = document.getElementById('testStatus');
+      const runBtn = document.getElementById('runTestsBtn');
+      const testSummary = document.getElementById('testSummary');
+
+      testOutput.innerHTML = '';
+      resetTestStats();
+      testSummary.style.display = 'block';
+      
+      const url = service ? `/api/tests/run?service=${service}` : '/api/tests/run';
+      const displayName = service || 'all services';
+      
+      testStatus.innerHTML = `<div class="spinner"></div><span>Running tests for ${displayName}...</span>`;
+      
+      currentTestStream = new EventSource(url);
+      isTestRunning = true;
+      runBtn.textContent = 'Stop Tests';
+      runBtn.classList.remove('btn-primary');
+      runBtn.classList.add('btn-danger');
+
+      currentTestStream.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'started') {
+          testStatus.innerHTML = `<div class="spinner"></div><span>Running tests for ${data.target}...</span>`;
+        } else if (data.type === 'output' || data.type === 'passed' || data.type === 'failed' || data.type === 'error' || data.type === 'skipped') {
+          const line = document.createElement('div');
+          line.className = `test-line ${data.type}`;
+          line.textContent = data.content;
+          testOutput.appendChild(line);
+          
+          if (data.type === 'passed' || data.type === 'failed' || data.type === 'skipped') {
+            updateTestStats(data.type);
+          }
+          
+          if (document.getElementById('testAutoScrollCheck').checked) {
+            testOutput.scrollTop = testOutput.scrollHeight;
+          }
+        } else if (data.type === 'completed') {
+          const status = data.success ? 'Tests completed successfully' : 'Tests completed with failures';
+          const statusColor = data.success ? 'var(--success)' : 'var(--error)';
+          testStatus.innerHTML = `<span style="color: ${statusColor}">${status}</span>`;
+          stopTests();
+        }
+      };
+
+      currentTestStream.onerror = () => {
+        testStatus.innerHTML = `<span style="color: var(--error)">Connection lost</span>`;
+        stopTests();
+      };
+    }
+
+    function stopTests() {
+      if (currentTestStream) {
+        currentTestStream.close();
+        currentTestStream = null;
+      }
+      isTestRunning = false;
+      const runBtn = document.getElementById('runTestsBtn');
+      runBtn.textContent = 'Run Tests';
+      runBtn.classList.remove('btn-danger');
+      runBtn.classList.add('btn-primary');
+    }
+
+    document.getElementById('runTestsBtn').addEventListener('click', runTests);
+
     fetchModules();
+    fetchTestServices();
     refreshInterval = setInterval(fetchModules, 5000);
 
     window.addEventListener('beforeunload', () => {
       if (refreshInterval) clearInterval(refreshInterval);
       if (currentLogStream) currentLogStream.close();
+      if (currentTestStream) currentTestStream.close();
     });
   </script>
 </body>
