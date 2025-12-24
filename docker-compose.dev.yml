@@ -1,0 +1,47 @@
+services:
+  dashboard:
+    build:
+      context: ./devtools/dashboard
+      dockerfile: Dockerfile
+    container_name: vibes-dashboard
+    ports:
+      - "127.0.0.1:7331:7331"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./devtools/modules.json:/app/modules.json:ro
+      - .:/workspace:ro
+    environment:
+      - DASHBOARD_PORT=7331
+      - COMPOSE_PROJECT_NAME=vibes_fm
+      - WORKSPACE_PATH=/workspace
+    working_dir: /app
+    networks:
+      - vibes-network
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
+      dockerfile: ../devtools/web.Dockerfile
+    container_name: vibes-web
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+    networks:
+      - vibes-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+networks:
+  vibes-network:
+    driver: bridge
