@@ -2,8 +2,8 @@
 {
   "title": "Shimza | Boiler Room x Ballantine's True Music 10: Johannesburg",
   "slug": "shimza-boiler-room-johannesburg",
-  "date": "2025-01-19",
-  "eventDate": "2025-01-19",
+  "date": "2026-01-19",
+  "eventDate": "2025-12-22",
   "postType": "set",
   "draft": false,
   "tags": ["boiler room", "johannesburg", "shimza", "afro house", "ballantines"],

@@ -2,8 +2,8 @@
 {
   "title": "Kampai | Boiler Room: Bengaluru",
   "slug": "kampai-boiler-room-bengaluru",
-  "date": "2025-01-19",
-  "eventDate": "2025-01-19",
+  "date": "2026-01-19",
+  "eventDate": "2025-06-19",
   "postType": "set",
   "draft": false,
   "tags": ["boiler room", "bengaluru", "bass", "breaks", "kampai"],

@@ -2,8 +2,8 @@
 {
   "title": "Shimza for Cercle at Citadelle de Sisteron, France",
   "slug": "shimza-cercle-sisteron",
-  "date": "2025-01-19",
-  "eventDate": "2025-01-19",
+  "date": "2026-01-19",
+  "eventDate": "2024-09-19",
   "postType": "set",
   "draft": false,
   "tags": ["cercle", "shimza", "afro house", "sisteron", "france", "citadel"],
